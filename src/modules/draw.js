@@ -20,20 +20,24 @@ const drawFuncs = {
 		cont.appendChild(canvasCont);
 		canvas = Snap(canvasCont);
 	},
-	deleteBall(ball) {
-		if (ball.circle) ball.circle.remove();
+	deleteBalls(balls) {
+		balls.map(ball=>{
+			if (ball.circle) ball.circle.remove();
+		});
 	},
 	deleteObs(obs) {
-		if (obs.rect) obs.rect.remove();
-		if (obs.text) obs.text.remove();
+		obs.map(ob=>{
+			if (ob.rect) ob.rect.remove();
+			if (ob.text) ob.text.remove();
+		});
 	},
 	deleteAim(aim) {
 		if (aim) aim.remove();
 	},
 	balls(balls) {
 		balls.map((ball) => {
-			this.deleteBall(ball);
-			ball.circle = canvas.circle(ball.x, ball.y, ball.r);
+			this.deleteBalls([ball]);
+			ball.circle = canvas.circle(...ball.coord.arr(), ball.r);
 			ball.circle.attr({
 				fill: "red"
 			});
@@ -41,7 +45,7 @@ const drawFuncs = {
 		});
 	},
 	aim(x1, y1, x2, y2) {
-		var aim = canvas.path(`M${x1},${y1}L${x2},${y2}`);
+		const aim = canvas.path(`M${x1},${y1}L${x2},${y2}`);
 		aim.attr({
 			stroke: "gray",
 			"stroke-dasharray": "5,5"
@@ -49,18 +53,18 @@ const drawFuncs = {
 		return aim;
 	},
 	obstacles(obstacles) {
-		for (var i = 0; i < obstacles.length; i++) {
-			var obstacle = obstacles[i];
-			this.deleteObs(obstacle);
-			obstacle.rect = canvas.rect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-			obstacle.rect.attr({
+		for (let i = 0; i < obstacles.length; i++) {
+			const ob = obstacles[i];
+			this.deleteObs([ob]);
+			ob.rect = canvas.rect(...ob.coord.arr(), ob.width, ob.height);
+			ob.rect.attr({
 				fill: "blue"
 			});
-			var textX = (obstacle.x + obstacle.width / 2) - obstacle.hits.toString().length * 4;
-			var textY = (obstacle.y + obstacle.height / 2) + 3;
-			obstacle.text = canvas.text(textX, textY, obstacle.hits);
-			obstacle.text.addClass("non-selectable");
-			obstacle.text.attr({
+			const textX = (ob.coord.x + ob.width / 2) - ob.hits.toString().length * 4;
+			const textY = (ob.coord.y + ob.height / 2) + 3;
+			ob.text = canvas.text(textX, textY, ob.hits);
+			ob.text.addClass("non-selectable");
+			ob.text.attr({
 				fill: "black",
 				"pointer-events": "none",
 			});

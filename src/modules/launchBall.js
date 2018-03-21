@@ -1,53 +1,52 @@
 "use strict";
 
 import draw from "./draw";
-import update from "./update";
+import util from "../utils";
 import {ballStamp} from "./modelsStamps";
 
+const aimOffsetX = 0.4;
+const aimOffsetY = 0.4;
 const setEvent = (cb=()=>{})=>{
-	let startPoint,aim,tempBall;
+	let sPoint,aim,tempBall;
 
-	window.addEventListener("mousedown", function(e){
-		const {offsetX,offsetY}=e;
-		startPoint = [offsetX, offsetY];
+	window.addEventListener("mousedown", function({offsetX:oX,offsetY:oY}){
+		sPoint = new util.Point(oX, oY);
 	});
 
-	window.addEventListener("mousemove", function(e){
-		if (!startPoint) return;
-		const dx = startPoint[0]-e.offsetX;
-		const dy = startPoint[1]-e.offsetY;
+	window.addEventListener("mousemove", function({offsetX:oX,offsetY:oY}){
+		if (!sPoint) return;
+		const dx = sPoint.x-oX;
+		const dy = sPoint.y-oY;
 		let length = Math.hypot(dx,dy);
 		if (length > 150) length = 150;
 		if (aim) draw.deleteAim(aim);
-		if (tempBall) draw.deleteBall(tempBall);
+		if (tempBall) draw.deleteBalls([tempBall]);
 
-		const startX = startPoint[0]+(dx*0.4);
-		const startY = startPoint[1]+(dy*0.4);
-		const ballX = e.offsetX+(dx*0.2);
-		const ballY = e.offsetY+(dy*0.2);
+		const startX = sPoint.x+(dx*0.4);
+		const startY = sPoint.y+(dy*0.4);
+		const ballX = oX+(dx*aimOffsetX);
+		const ballY = oY+(dy*aimOffsetY);
 
-		tempBall = {
-			x:ballX,y:ballY,
+		tempBall = ballStamp({
+			coord: new util.Point(ballX, ballY),
 			r:4
-		};
+		});
 
 		aim = draw.aim(ballX, ballY, startX, startY);
 
 		draw.balls([tempBall]);
 	});
 
-	window.addEventListener("mouseup", function(e){
-		const {offsetX,offsetY}=e;
-		const endPoint = [offsetX, offsetY];
-		const dx = startPoint[0]-endPoint[0];
-		const dy = startPoint[1]-endPoint[1];
-		let length = Math.hypot(dx,dy);
-		if (length > 150) length = 150;
+	window.addEventListener("mouseup", function({offsetX:oX,offsetY:oY}){
+		const ePoint = new util.Point(oX, oY);
+		const dx = sPoint.x-ePoint.x;
+		const dy = sPoint.y-ePoint.y;
+		const length = Math.hypot(dx,dy);
 		const sin = dx/length;
 		const cos = dy/length;
 
 		const ball = ballStamp({
-			x:endPoint[0]+(dx*0.4),y:endPoint[1]+(dy*0.4),
+			coord: new util.Point(ePoint.x+(dx*aimOffsetX), ePoint.y+(dy*aimOffsetY)),
 			speed:0.3*(length/150),
 			r:4,
 			vec: {
@@ -59,10 +58,10 @@ const setEvent = (cb=()=>{})=>{
 		cb(ball);
 
 		draw.deleteAim(aim);
-		draw.deleteBall(tempBall);
-		startPoint = undefined;
+		draw.deleteBalls([tempBall]);
+		sPoint = undefined;
 	});
-}
+};
 
 
 const launchBall = function({container},cb){
@@ -73,4 +72,4 @@ const launchBall = function({container},cb){
 	setEvent(cb);
 };
 
-export default launchBall
+export default launchBall;

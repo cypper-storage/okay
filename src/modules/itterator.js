@@ -41,7 +41,7 @@ const itteratorStamp = stampit().init(function(_,{args}){
 			},spf-delta);
 		}
 		frame++;
-	}
+	};
 	step(Date.now());
 });
 

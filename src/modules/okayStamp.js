@@ -12,14 +12,15 @@ const stampit = require("stampit");
 
 const okayStamp = stampit().init(function(opt,{instance}){
 	this.opt = opt;
-	const obstacles = [],balls = [];
+	let obstacles = [],balls = [];
 	const init = function(){
 		draw.prepareIfNot(opt);
 		for (let i = 0; i < 15; i++) {
 			for (let i2 = 0; i2 < 8; i2++) {
-				// if (i2 === 1) continue;
+				if (i2 === 3) continue;
 				obstacles.push(obstacleStamp({
-					x: 41*i, y: 41*i2, hits: Math.round(Math.random()*10)
+					coord: new util.Point(41*i, 41*i2),
+					hits: Math.round(Math.random()*10)
 				}));
 			}
 		}
@@ -28,18 +29,19 @@ const okayStamp = stampit().init(function(opt,{instance}){
 	this.start = () => {
 		init();
 		itteratorStamp(120, (delta,fps) => {
-			balls.map(function(ball){
-				ball.ballupdate(delta);
-			});
-			update.updateAll(balls,obstacles,opt);
+			update.updateAll(balls,obstacles,delta,opt);
 			update.ballWithObstacles(balls,obstacles);
 			draw.balls(balls);
-			// draw.obstacles(obstacles);
 		},opt.fpsNode);
 		console.log("run");
 	};
 	
-	launchBall(opt,ball=>balls.push(ball));
+	launchBall(opt,ball=>{
+		if (!update.ballInObstacles(ball,obstacles)) {
+			draw.deleteBalls(balls);
+			balls = [ball];
+		}
+	});
 	
 });
 

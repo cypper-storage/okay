@@ -25,6 +25,10 @@ const now = () => {
 	date = +date - date.getTimezoneOffset()*60*1000;
 	return new Date(date).toISOString().replace(/T/, ' ').replace(/\..+/, '').substr(-8);
 }
+const nowFull = () => {
+	let date = new Date().toString();
+	return date.substr(0, date.indexOf(" GMT"));
+}
 
 const comment = `/*\n
 	 * <%= pkg.name %> <%= pkg.version %>
