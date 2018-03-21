@@ -10,6 +10,7 @@ var okay1 = okayStamp({
 });
 okay1.start();
 console.log(okay1);
+console.log("dev");
 
 
 
