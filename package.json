@@ -22,7 +22,7 @@
     "strict": true,
     "git": {
       "remote": "https://github.com/cypper/okay.git",
-      "branch": "master",
+      "branch": "dev",
       "cwd": "./",
       "files": ["./*","!./node_modules/"],
       "commitMessage": "cypper"
