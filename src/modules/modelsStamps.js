@@ -6,15 +6,12 @@ const stampit = require("stampit");
 
 const ballStamp = stampit()
 	.deepProps({
-		vec: {
-			dx: 1,
-			dy: 1
-		},
+		vec: new util.Vector(1, 1),
 		pCoord: new util.Point(0, 0),
 		coord: new util.Point(0, 0),
 	})
 	.props({
-		r: 1, speed: 0.1, friction: 0.05, maxSpeed: 0.2
+		r: 1, friction: 0.05, maxSpeed: 0.2
 	})
 	.methods({
 		setVec: function(direct){
@@ -27,12 +24,12 @@ const ballStamp = stampit()
 
 		},
 		ballupdate: function(delta){
-			if (this.maxSpeed < this.speed) this.speed = this.maxSpeed;
-			this.speed -= this.speed*this.friction*(delta/1000);
+			// if (this.maxSpeed < this.vec.module()) this.vec = ;
+			// this.speed -= this.speed*this.friction*(delta/1000);
 			this.pCoord.copy(this.coord);
 			this.coord.add({
-				x: this.speed*delta*this.vec.dx,
-				y: this.speed*delta*this.vec.dy
+				x: delta*this.vec.dx,
+				y: delta*this.vec.dy
 			});
 		}
 	})

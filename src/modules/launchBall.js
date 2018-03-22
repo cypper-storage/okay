@@ -44,15 +44,12 @@ const setEvent = (cb=()=>{})=>{
 		const length = Math.hypot(dx,dy);
 		const sin = dx/length;
 		const cos = dy/length;
+		const speed = 0.3*(length/150);
 
 		const ball = ballStamp({
 			coord: new util.Point(ePoint.x+(dx*aimOffsetX), ePoint.y+(dy*aimOffsetY)),
-			speed:0.3*(length/150),
 			r:4,
-			vec: {
-				dx: sin,
-				dy: cos
-			}
+			vec: new util.Vector(sin*speed, cos*speed)
 		});
 
 		cb(ball);

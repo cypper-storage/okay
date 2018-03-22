@@ -6,11 +6,11 @@ import draw from "./draw";
 var updFuncs = {
 	updateAll(balls, obs, delta, opt) {
 		this.updateBalls(balls, delta, opt);
+		this.ballWithObstacles(balls, obs);
 		this.updateObs(obs);
 	},
 	updateObs(obs) {
 		obs.map(function (ob, i, obj) {
-			// console.log(ob.hits);
 			if (ob.hits <= 0) {
 				obj.splice(i, 1);
 				draw.deleteObs([ob]);
@@ -40,16 +40,18 @@ var updFuncs = {
 	},
 	ballInObstacles(ball,obs) {
 		return obs.some((ob) => {
-			if (this.ballInObstacle(ball,ob)) return true;
+			if (this.ballInObstacle(ball,ob) !== null) return true;
 			else return false;
 		});
 	},
 	ballWithObstacles(balls, obs) {
 		balls.map((ball) => {
 			for(const ob of obs) {
-				if (this.ballInObstacle(ball,ob)) {
-					if (util.inBtw(ob.coord.y, ob.coord.y + ob.height, ball.pCoord.y)) ball.vec.dx = -ball.vec.dx;
-					else ball.vec.dy = -ball.vec.dy;
+				const newVec = this.ballInObstacle(ball,ob);
+				if (newVec !== null) {
+					// if (util.inBtw(ob.coord.y, ob.coord.y + ob.height, ball.pCoord.y)) ball.vec.dx = -ball.vec.dx;
+					// else ball.vec.dy = -ball.vec.dy;
+					ball.vec = newVec;
 					ob.hitted();
 					draw.obstacles([ob]);
 					break;

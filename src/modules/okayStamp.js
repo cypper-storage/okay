@@ -10,27 +10,37 @@ import {ballStamp, obstacleStamp} from "./modelsStamps";
 const stampit = require("stampit");
 
 
+// let angle1 = Math.PI*2;
+// console.log(new util.Vector(2,1).rotate(Math.sin(angle1),Math.cos(angle1)))
+// angle1 = Math.PI;
+// console.log(new util.Vector(2,1).rotate(Math.sin(angle1),Math.cos(angle1)))
+// angle1 = Math.PI/2;
+// console.log(new util.Vector(2,1).rotate(Math.sin(angle1),Math.cos(angle1)))
+
+
+
 const okayStamp = stampit().init(function(opt,{instance}){
+	// return;
 	this.opt = opt;
 	let obstacles = [],balls = [];
 	const init = function(){
 		draw.prepareIfNot(opt);
-		for (let i = 0; i < 15; i++) {
-			for (let i2 = 0; i2 < 8; i2++) {
-				if (i2 === 3) continue;
+		// for (let i = 0; i < 1; i++) {
+		// 	for (let i2 = 0; i2 < 1; i2++) {
+		// 		if (i2 === 3) continue;
 				obstacles.push(obstacleStamp({
-					coord: new util.Point(41*i, 41*i2),
-					hits: Math.round(Math.random()*10)
+					coord: new util.Point(41*5, 41*5),
+					hits: Math.round(1000)
+					// hits: Math.round(Math.random()*1000)
 				}));
-			}
-		}
+		// 	}
+		// }
 		draw.obstacles(obstacles);
 	};
 	this.start = () => {
 		init();
 		itteratorStamp(120, (delta,fps) => {
 			update.updateAll(balls,obstacles,delta,opt);
-			update.ballWithObstacles(balls,obstacles);
 			draw.balls(balls);
 		},opt.fpsNode);
 		console.log("run");
@@ -38,8 +48,9 @@ const okayStamp = stampit().init(function(opt,{instance}){
 	
 	launchBall(opt,ball=>{
 		if (!update.ballInObstacles(ball,obstacles)) {
-			draw.deleteBalls(balls);
-			balls = [ball];
+			// draw.deleteBalls(balls);
+			// balls = [ball];
+			balls.push(ball);
 		}
 	});
 	
