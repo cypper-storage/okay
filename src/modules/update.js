@@ -31,12 +31,16 @@ var updFuncs = {
 		});
 	},
 	ballInObstacle(ball,ob) {
-		return (util.circleInArea(ball,{
-			x1: ob.coord.x,
-			x2: ob.coord.x + ob.width,
-			y1: ob.coord.y,
-			y2: ob.coord.y + ob.height,
-		}));
+		if (ob.name() === "section") {
+			return (util.circleHitSection(ball,ob.coord,ob.coord2));
+		} else if (ob.name() === "rect") {
+			return (util.circleHitArea(ball,{
+				x1: ob.coord.x,
+				x2: ob.coord.x + ob.width,
+				y1: ob.coord.y,
+				y2: ob.coord.y + ob.height,
+			}));
+		}
 	},
 	ballInObstacles(ball,obs) {
 		return obs.some((ob) => {

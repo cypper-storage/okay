@@ -5,7 +5,7 @@ import draw from "./draw";
 import update from "./update";
 import launchBall from "./launchBall";
 import {itteratorStamp} from "./itterator";
-import {ballStamp, obstacleStamp} from "./modelsStamps";
+import {ballStamp, rectStamp, sectionStamp} from "./modelsStamps";
 
 const stampit = require("stampit");
 
@@ -25,14 +25,18 @@ const okayStamp = stampit().init(function(opt,{instance}){
 	let obstacles = [],balls = [];
 	const init = function(){
 		draw.prepareIfNot(opt);
+		obstacles.push(sectionStamp({
+			coord: new util.Point(100,100),
+			coord2: new util.Point(200,200)
+		}))
 		// for (let i = 0; i < 1; i++) {
 		// 	for (let i2 = 0; i2 < 1; i2++) {
 		// 		if (i2 === 3) continue;
-				obstacles.push(obstacleStamp({
-					coord: new util.Point(41*5, 41*5),
-					hits: Math.round(1000)
-					// hits: Math.round(Math.random()*1000)
-				}));
+				// obstacles.push(rectStamp({
+				// 	coord: new util.Point(41*5, 41*5),
+				// 	hits: Math.round(1000)
+				// 	// hits: Math.round(Math.random()*1000)
+				// }));
 		// 	}
 		// }
 		draw.obstacles(obstacles);

@@ -27,7 +27,7 @@ const drawFuncs = {
 	},
 	deleteObs(obs) {
 		obs.map(ob=>{
-			if (ob.rect) ob.rect.remove();
+			if (ob.node) ob.node.remove();
 			if (ob.text) ob.text.remove();
 		});
 	},
@@ -55,13 +55,23 @@ const drawFuncs = {
 	obstacles(obstacles) {
 		for (let i = 0; i < obstacles.length; i++) {
 			const ob = obstacles[i];
+			let textX, textY;
 			this.deleteObs([ob]);
-			ob.rect = canvas.rect(...ob.coord.arr(), ob.width, ob.height);
-			ob.rect.attr({
-				fill: "blue"
-			});
-			const textX = (ob.coord.x + ob.width / 2) - ob.hits.toString().length * 4;
-			const textY = (ob.coord.y + ob.height / 2) + 3;
+			if (ob.name() === "section") {
+				ob.node = canvas.path("M"+ob.coord.toStr()+"L"+ob.coord2.toStr());
+				ob.node.attr({
+					stroke: "blue"
+				});
+				textX = (ob.coord.x + ob.coord2.x)/2 - ob.hits.toString().length * 4;
+				textY = (ob.coord.y + ob.coord2.y)/2 + 3;
+			} else if (ob.name() === "rect") {
+				ob.node = canvas.rect(...ob.coord.arr(), ob.width, ob.height);
+				textX = (ob.coord.x + ob.width / 2) - ob.hits.toString().length * 4;
+				textY = (ob.coord.y + ob.height / 2) + 3;
+				ob.node.attr({
+					fill: "blue"
+				});
+			}
 			ob.text = canvas.text(textX, textY, ob.hits);
 			ob.text.addClass("non-selectable");
 			ob.text.attr({

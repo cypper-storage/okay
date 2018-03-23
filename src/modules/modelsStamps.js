@@ -24,7 +24,7 @@ const ballStamp = stampit()
 
 		},
 		ballupdate: function(delta){
-			// if (this.maxSpeed < this.vec.module()) this.vec = ;
+			if (this.maxSpeed < this.vec.module()) this.vec.toLen(this.maxSpeed);
 			// this.speed -= this.speed*this.friction*(delta/1000);
 			this.pCoord.copy(this.coord);
 			this.coord.add({
@@ -42,18 +42,39 @@ const ballStamp = stampit()
 const obstacleStamp = stampit()
 	.deepProps({
 		coord: new util.Point(0, 0),
-	})
-	.props({
-		width: 40, height: 40, hits: 40
+		hits: 40
 	})
 	.methods({
-		hitted: function(){
+		hitted(){
 			if (this.hits <= 0) return (this.hits = 0);
 			return --this.hits;
-		}
+		},
+		name(){return "obstacle";}
 	})
 	.init(function(opt){
 		Object.assign(this,opt);
 	});
 
-export {ballStamp, obstacleStamp};
+const rectStamp = stampit()
+	.compose(obstacleStamp)
+	.deepProps({
+		width: 140, height: 140
+	})
+	.methods({name(){return "rect";}});
+
+const lineStamp = stampit()
+	.compose(obstacleStamp)
+	.deepProps({
+		vec: new util.Vector(1,1)
+	})
+	.methods({name(){return "line";}});
+
+const sectionStamp = stampit()
+	.compose(obstacleStamp)
+	.deepProps({
+		coord2: new util.Point(100,100)
+	})
+	.methods({name(){return "section";}});
+
+
+export {ballStamp, rectStamp, lineStamp, sectionStamp};

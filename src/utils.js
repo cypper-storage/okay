@@ -12,6 +12,11 @@ class Vector {
 			throw "Error wrong vector construct params";
 		}
 	}
+	copy({dx,dy}) {
+		this.dx = dx;
+		this.dy = dy;
+		return this;
+	}
 	scalar(vec) {
 		return this.dx*vec.dx + this.dy*vec.dy;
 	}
@@ -32,6 +37,22 @@ class Vector {
 			this.dx = tempDx;
 		}
 		return this;
+	}
+	toLen(len) {
+		const k = len/this.module();
+		this.dx *= k;
+		this.dy *= k;
+		return this;
+	}
+	paralel(vec) {
+		if (this.isZero() || vec.isZero()) throw "One vector is zero";
+		return util.equalPrec(vec.dy*this.dx, vec.dx*this.dy);
+	}
+	isZero(vec) {
+		return (util.equalPrec(this.dx,0) && util.equalPrec(this.dy,0));
+	}
+	perpendicular(vec) {
+		return util.equalPrec(this.scalar(vec), 0);
 	}
 	changeDirection() {
 		this.dx = -this.dx;
@@ -59,30 +80,85 @@ class Point {
 	len(point) {
 		return Math.hypot(this.x-point.x,this.y-point.y);
 	}
+	toStr() {
+		return `${this.x},${this.y}`;
+	}
 	get ["0"]() {return this.x;}
 	set ["0"](v) {this.x = v;}
 	get ["1"]() {return this.y;}
 	set ["1"](v) {this.y = v;}
 }
 
-const utils = {
-	cross2VecWithP({dx,dy},{x,y},{dx:dx2,dy:dy2},{x:x2,y:y2}){
+const util = {
+	cross2VecWithP(vec1,{x:x1,y:y1},vec2,{x:x2,y:y2}){
+		let x,y;
+		const {dx:dx1,dy:dy1} = vec1;
+		const {dx:dx2,dy:dy2} = vec2;
+		const p1 = x1*dy1 - y1*dx1;
+		const p2 = x2*dy2 - y2*dx2;
+		if (vec1.isZero()) return null;
+		if (vec2.isZero()) return null;
+		if (vec1.paralel(vec2)) return null;
 
+		if (this.equalPrec(dx1, 0) && this.equalPrec(dy2, 0)) {
+			x = p1/dy1;
+			y = -p2/dx2;
+		} else if (this.equalPrec(dx2, 0) && this.equalPrec(dy1, 0)) {
+			y = -p1/dx1;
+			x = p2/dy2;
+		} else if (this.equalPrec(dx1, 0)) {
+			x = p1/dy2;
+			y = (p1*dy2) / (dy1*dx2) - p2/dx2;
+		} 
+		else if (this.equalPrec(dx2, 0)) {
+			x = p2/dy2;
+			y = (x*dy1 - p1) / dx1 ;
+		}
+		else if (this.equalPrec(dy1, 0)) {
+			y = -p1 / dx1;
+			x = (p2 + y*dx2) / dy2;
+		}
+		else if (this.equalPrec(dy2, 0)) {
+			y = -p2 / dx2;
+			x = (p1 + y*dx1) / dy1;
+		}
+		else {
+			// const p1 = (dx1*x1 - y1*dy1);
+			// const p2 = (dx2*x2 - y2*dy2);
+			// // y = (p1*dx2 - p2*dx1) / (dy2*dx1 - dy1*dx2);
+			// // x = (p2*dy1 - p1*dy2) / (dy1*dx2 - dy2*dx1);
+			// x = (p2/dy2 - p1/dy1) / (dx2/dy2 - dx1/dy1);
+			// y = (p1/dx1 - p2/dx2) / (dy2/dx2 - dy1/dx1);
+
+			x = (p1/dx1 - p2/dx2) / (dy1/dx1 - dy2/dx2);
+			y = (p1/dy1 - p2/dy2) / (dx2/dy2 - dx1/dy1);
+		}
+		// x*dy1 - y*dx1 = p1;
+		// x*dy2 - y*dx2 = p2;
+		// y - x*dy1/dx1 = p1/dx1;
+		// y - x*dy2/dx2 = p2/dx2;
+		// x*dy1/dx1 - y = p1/dx1;
+		// x*dy2/dx2 - y = p2/dx2;
+
+		if ((x === Infinity || x === -Infinity) || (y === Infinity || y === -Infinity)) throw `Error coords is infinity ${x},${y}`;
+
+		return new Point(x,y);
 	},
 	crossVecWithPAnd2Ps({dx,dy},{x,y},{x:x1,y:y1},{x:x2,y:y2}){
-		let xN,yN;
-		if (dx === 0) {
-			xN = x1;
-			yN = y;
-			// yN = ((y2-y1)*(xN-x1))/(x2-x1) + y1;
-		} else if (dy === 0) {
-			yN = y1;
-			xN = x;
-			// if (y2 - y1 === 0) {
 
-			// }
-			// xN = x1-((y1*(x2-x1))/(y2-y1));
-		} else {
+		let xN,yN;
+		// if (dx === 0) {
+		// 	xN = x1;
+		// 	yN = y;
+		// 	// yN = ((y2-y1)*(xN-x1))/(x2-x1) + y1;
+		// } else if (dy === 0) {
+		// 	yN = y1;
+		// 	xN = x;
+		// 	// if (y2 - y1 === 0) {
+
+		// 	// }
+		// 	// xN = x1-((y1*(x2-x1))/(y2-y1));
+		// } else {
 			const k1 = y2 - y1;
 			const k2 = y - y1;
 			const k3 = x2 - x1;
@@ -90,43 +166,68 @@ const utils = {
 			const k5 = ((dy*k3)/dx) - k1;
 			xN = ((x*dy*k3)/dx - k4)/k5;
 			yN = ((xN-x)*dy)/dx + y;
-		}
+		// }
 		return new Point(xN,yN);
 	},
-	circleInArea({coord,vec,r},{x1,y1,x2,y2}){
-		const {x,y} = coord;
-		const {dx,dy} = vec;
+	circleHitSection(ball,p1,p2){
+		const {coord,vec,r} = ball;
+		if (vec.isZero()) return null;
+		const sideVec = new Vector(p1,p2);
+		if (sideVec.isZero()) return null;
+		const n = (new Vector(p1,p2)).rotate(Math.PI/2);
+		// const Op = this.crossVecWithPAnd2Ps(n,coord,...side);
+		const Op = this.cross2VecWithP(n,coord,sideVec,p1);
+		if (Op === null) return null;
+		// console.log(Op);
+		if (!this.inBtwLines(p1.x, p2.x, Op.x) &&
+			!this.inBtwLines(p1.y, p2.y, Op.y)) return null;
+
+		const D = this.cross2VecWithP(vec,coord,sideVec,p1);
+		if (D === null) return null;
+		const l = D.len(coord);
+
+
+		let cosVecs = sideVec.cos(vec);
+		if (cosVecs < 0) cosVecs = -cosVecs;
+		// if (cosVecs > 0) cosVecs = sideVec.changeDirection().cos(vec);
+		const alpha = Math.acos(cosVecs);
+
+		const z = Math.sqrt(Math.pow(l,2) - Math.pow(cosVecs*l,2) );
+		// console.log(z);
+		if (z < 0) console.log(z);
+		if (z < r) {
+			console.log(2*alpha*57.2957);
+			vec.rotate(2*alpha);
+			// ball.ballupdate(5);
+			return vec;
+			vec.copy(new Vector(0,0));
+		}
+		return null;
+	},
+	circleHitArea(ball,{x1,y1,x2,y2}){
+		const {vec} = ball;
+		if (vec.isZero()) return null;
 		const p1 = new Point(x1,y1);
 		const p2 = new Point(x2,y1);
 		const p3 = new Point(x2,y2);
 		const p4 = new Point(x1,y2);
+		p3.add({
+			x:0,
+			y:0
+		});
 		// yN = (xN-x)*dy/dx + y;
 		// yN = ((side[1].y-side[0].y)*(xN-side[0].x)/(side[1].x-side[0].x))+side[0].y
-		for(const side of [[p1,p2],[p2,p3],[p3,p4],[p4,p1]]) {
-		// for(const side of [[p3,p4]]) {
-			const sideVec = new Vector(side[0],side[1]);
-			const n = new Vector(1,(sideVec.dy === 0 ? 0 : sideVec.dx/sideVec.dy));
-			const Op = this.crossVecWithPAnd2Ps(n,coord,...side);
-			console.log(Op);
-			if (!this.inBtwLines(side[0].x, side[1].x, Op.x) &&
-				!this.inBtwLines(side[0].y, side[1].y, Op.y)) return null;
-
-			const D = this.crossVecWithPAnd2Ps(vec,coord,...side);
-			const l = D.len(coord);
-
-
-			const cosVecs = sideVec.cos(vec);
-			const alpha = Math.acos(cosVecs);
-			const z = Math.sqrt(Math.pow(l,2) - Math.pow(cosVecs*l,2) );
-			console.log(z);
-
-			if (z < r) {
-				vec.rotate(-2*alpha);
-				return vec;
-			}
+		console.log("-");
+		// for(const side of [[p1,p2],[p2,p3],[p3,p4],[p4,p1]]) {
+		for(const side of [[p2,p3]]) {
+			if (this.circleHitSection(ball,...side) !== null) return vec;
 		}
 		return null;
 		// return (this.inBtw(...this.narrow(x1, x2, r), x) && this.inBtw(...this.narrow(y1, y2, r), y));
+	},
+	// circleHitLine()
+	equalPrec(num1,num2,prec=0.000001) {
+		return (Math.abs(num1 - num2) <= prec);
 	},
 	sinToDeg(value) {
 		return Math.asin(value)*57.2957795;
@@ -157,4 +258,4 @@ const utils = {
 	Vector
 };
 
-export default utils;
+export default util;
